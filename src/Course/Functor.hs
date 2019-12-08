@@ -56,8 +56,8 @@ instance Functor List where
     (a -> b)
     -> List a
     -> List b
-  (<$>) =
-    error "todo: Course.Functor (<$>)#instance List"
+  (<$>) = map
+    
 
 -- | Maps a function on the Optional functor.
 --
@@ -83,8 +83,8 @@ instance Functor ((->) t) where
     (a -> b)
     -> ((->) t a)
     -> ((->) t b)
-  (<$>) =
-    error "todo: Course.Functor (<$>)#((->) t)"
+  (<$>) = \f -> \fa -> \fb -> f (fa fb)     -- this is (.) composition
+    
 
 -- | Anonymous map. Maps a constant value on a functor.
 --
@@ -95,12 +95,12 @@ instance Functor ((->) t) where
 --
 -- prop> \x q -> x <$ Full q == Full x
 (<$) ::
-  Functor k =>
+  Functor k =>      -- k has eff map
   a
   -> k b
   -> k a
-(<$) =
-  error "todo: Course.Functor#(<$)"
+(<$) = \f1 -> \f2 -> (\s -> f1) <$> f2    -- (\_ -> x) = const x
+-- (<$) a kb = const a <$> kb
 
 -- | Anonymous map producing unit value.
 --
@@ -119,8 +119,11 @@ void ::
   Functor k =>
   k a
   -> k ()
-void =
-  error "todo: Course.Functor#void"
+void = \f -> (\_ -> ()) <$> f
+
+-- void = \f -> const () <$> f
+-- 
+-- void = (<$) ()
 
 -----------------------
 -- SUPPORT LIBRARIES --

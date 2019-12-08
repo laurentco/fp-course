@@ -1,0 +1,39 @@
+(+1) :: Int -> Int
+(+) :: Int -> (Int -> Int).        :kind returns the kind of a type
+Int :: Type
+List :: Type -> Type
+List Int :: Type
+(->) :: Type -> Type -> Type
+
+
+\x -> f x = f
+(\_ -> x) = const x
+
+lift0 :: a         -> k a  (pure)
+lift1 :: (a->b)    -> k a -> k b  (<*>)
+lift2 :: (a->b->c) -> k a -> k b -> k c 
+
+liftN can be expressed as lift[N-1] and <*>
+
+
+Functor < Applicative < Monad     
+
+Functor
+  - eff map
+
+Applicative
+  - lift2
+  - sequence
+  - replicateA
+
+class Applicative k => trait Applicative[K] 
+
+instance <type Class> <Data> => new Applicative[K]
+
+see the StateT class that is a generic parser
+
+<$> = map
+
+\x -> f(g x) (h x) => lift2 f g h
+
+

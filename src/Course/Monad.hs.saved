@@ -21,7 +21,6 @@ import qualified Prelude as P((=<<))
 class Applicative k => Monad k where
   -- Pronounced, bind.
   (=<<) ::
-    -- (a -> k b)
     (a -> k b)
     -> k a
     -> k b
@@ -50,7 +49,7 @@ instance Monad List where
     -> List a
     -> List b
   (=<<) =
-    flatMap
+    error "todo: Course.Monad (=<<)#instance List"
 
 -- | Binds a function on an Optional.
 --
@@ -70,15 +69,11 @@ instance Monad Optional where
 -- 119
 instance Monad ((->) t) where
   (=<<) ::
-    -- (a -> ((->) t b))
-    -- -> ((->) t a)
-    -- -> ((->) t b)
-    (a -> t -> b)
-    -> (t -> a)
-    -> t
-    -> b
-  (=<<) a2t2b t2a t =
-    a2t2b (t2a t) t
+    (a -> ((->) t b))
+    -> ((->) t a)
+    -> ((->) t b)
+  (=<<) =
+    error "todo: Course.Monad (=<<)#instance ((->) t)"
 
 -- | Witness that all things with (=<<) and (<$>) also have (<*>).
 --
@@ -116,8 +111,8 @@ instance Monad ((->) t) where
   k (a -> b)
   -> k a
   -> k b
-(<**>) k_a2b k_a =
-  (\a2b -> (\a -> pure (a2b a)) =<< k_a) =<< k_a2b
+(<**>) =
+  error "todo: Course.Monad#(<**>)"
 
 infixl 4 <**>
 
@@ -139,9 +134,7 @@ join ::
   k (k a)
   -> k a
 join =
-  (=<<) id
--- (a -> k b) -> k a -> k b
-
+  error "todo: Course.Monad#join"
 
 -- | Implement a flipped version of @(=<<)@, however, use only
 -- @join@ and @(<$>)@.
@@ -155,7 +148,7 @@ join =
   -> (a -> k b)
   -> k b
 (>>=) =
-  flip (=<<)
+  error "todo: Course.Monad#(>>=)"
 
 infixl 1 >>=
 
@@ -170,8 +163,8 @@ infixl 1 >>=
   -> (a -> k b)
   -> a
   -> k c
-(<=<) b2k_c a2k_b a =
-  a2k_b a >>= b2k_c
+(<=<) =
+  error "todo: Course.Monad#(<=<)"
 
 infixr 1 <=<
 

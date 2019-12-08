@@ -66,14 +66,17 @@ instance Applicative List where
   pure ::
     a
     -> List a
-  pure =
-    error "todo: Course.Applicative pure#instance List"
+  pure a = (a :. Nil)
+   
   (<*>) ::
     List (a -> b)
     -> List a
     -> List b
-  (<*>) =
-    error "todo: Course.Apply (<*>)#instance List"
+  (<*>) Nil _ = Nil
+  (<*>) (f1 :. funs) list = map f1 list ++ ((<*>) funs list)
+
+-- (<*>) funs = flatMap map
+-- 
 
 -- | Insert into an Optional.
 --
@@ -122,15 +125,14 @@ instance Applicative ((->) t) where
   pure ::
     a
     -> ((->) t a)
-  pure =
-    error "todo: Course.Applicative pure#((->) t)"
+  pure = const
+    
   (<*>) ::
     ((->) t (a -> b))
     -> ((->) t a)
     -> ((->) t b)
-  (<*>) =
-    error "todo: Course.Apply (<*>)#instance ((->) t)"
-
+  (<*>) = \f1 -> \f2 -> \f3 -> (f1 f3) (f2 f3)
+    
 
 -- | Apply a binary function in the environment.
 --
@@ -157,8 +159,11 @@ lift2 ::
   -> k a
   -> k b
   -> k c
-lift2 =
-  error "todo: Course.Applicative#lift2"
+lift2 a2b2c ka kb = a2b2c <$> ka <*> kb   
+-- lift2 (a -> f1) -> k a -> k1 ( b -> c) = liftOne f k 
+  
+liftOne :: Applicative k => (a -> b) -> k a -> k b
+liftOne f k = pure f <*> k
 
 -- | Apply a ternary function in the environment.
 -- /can be written using `lift2` and `(<*>)`./
@@ -190,8 +195,7 @@ lift3 ::
   -> k b
   -> k c
   -> k d
-lift3 =
-  error "todo: Course.Applicative#lift3"
+lift3 a2b2c2d ka kb kc = a2b2c2d <$> ka <*> kb <*> kc
 
 -- | Apply a quaternary function in the environment.
 -- /can be written using `lift3` and `(<*>)`./
@@ -232,8 +236,7 @@ lift0 ::
   Applicative k =>
   a
   -> k a
-lift0 =
-  error "todo: Course.Applicative#lift0"
+lift0 = pure
 
 -- | Apply a unary function in the environment.
 -- /can be written using `lift0` and `(<*>)`./
@@ -251,8 +254,7 @@ lift1 ::
   (a -> b)
   -> k a
   -> k b
-lift1 =
-  error "todo: Course.Applicative#lift1"
+lift1 f a = pure f <*> a
 
 -- | Apply, discarding the value of the first argument.
 -- Pronounced, right apply.
@@ -277,8 +279,10 @@ lift1 =
   k a
   -> k b
   -> k b
-(*>) =
-  error "todo: Course.Applicative#(*>)"
+(*>) = lift2 (const id)
+
+-- lift2 (a -> b -> c) -> (k a -> k b -> k c)
+--       \a b -> b  = const id
 
 -- | Apply, discarding the value of the second argument.
 -- Pronounced, left apply.
@@ -303,8 +307,10 @@ lift1 =
   k b
   -> k a
   -> k b
-(<*) =
-  error "todo: Course.Applicative#(<*)"
+(<*) = lift2 const
+
+myf :: b -> a -> b
+myf = \x -> \_ -> x    -- const
 
 -- | Sequences a list of structures to a structure of list.
 --
@@ -326,8 +332,14 @@ sequence ::
   Applicative k =>
   List (k a)
   -> k (List a)
-sequence =
-  error "todo: Course.Applicative#sequence"
+sequence = 
+ -- foldRight _cons _nil
+  foldRight (lift2 (:.)) (pure Nil)
+
+-- fn :: a -> List a -> List a
+-- fn = \a \t -> a :. t
+-- fn = \a \t -> (:.) a t
+-- fn = (:.)
 
 -- | Replicate an effect a given number of times.
 --
@@ -352,8 +364,18 @@ replicateA ::
   Int
   -> k a
   -> k (List a)
-replicateA =
-  error "todo: Course.Applicative#replicateA"
+replicateA n ka = sequence (replicate n ka)
+
+kfn ::
+  Applicative k =>
+  k a -> k (List a)
+kfn = lift1 fn
+
+-- lift1 :: (a -> b) -> (k a -> k b)
+
+fn :: a -> List a     -- List.pure?
+fn a = a :. Nil        
+
 
 -- | Filter a list with a predicate that produces an effect.
 --
